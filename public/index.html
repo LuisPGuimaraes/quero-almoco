@@ -1,15 +1,98 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Convidado para o Almoço</title>
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #b34cee;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    form {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-weight: 700;
+      color: #2c3e50;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #34495e;
+    }
+
+    input[type="date"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    input[type="date"]:focus {
+      outline: none;
+      border-color: #2ecc71;
+      box-shadow: 0 0 5px rgba(46, 204, 113, 0.6);
+    }
+
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #2ecc71;
+    }
+
+    /* Responsivo */
+    @media (max-width: 480px) {
+      form {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; padding: 40px; background-color: #f0f0f0">
-  <h1>Agendar convidado para o almoço</h1>
+<body>
   <form action="/enviar" method="POST">
+    <h1>Eaii Duda</h1>
+    <h3>Não esqueceu dessa vez né</h3>
+    <h3>Preenche aí</h3>
     <label for="data">Data do almoço:</label>
-    <input type="date" name="data" required>
-    <br><br>
+    <input type="date" name="data" id="data" required />
     <button type="submit">Enviar pedido</button>
   </form>
 </body>
