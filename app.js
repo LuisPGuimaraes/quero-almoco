@@ -2,6 +2,7 @@ const express = require('express');
 const submitForm = require('./submitForm');
 const path = require('path');
 const bodyParser = require('body-parser');
+require('dotenv').config();
 
 const app = express();
 const PORT = 3000;
@@ -18,7 +19,8 @@ app.post('/enviar', async (req, res) => {
     await submitForm(data);
     res.send('<h2>✅ Pedido enviado com sucesso!</h2><a href="/">Voltar</a>');
   } catch (err) {
-    res.send(`<h2>❌ Erro ao enviar: ${err.message}</h2><a href="/">Voltar</a>`);
+    console.log(`URL do formulário: ${process.env.URL_TESTE}`);
+    res.send(`<h2>❌ Erro ao enviar: Deu ruim, volta e tenta de novo.</h2><a href="/">Voltar</a>`);
   }
 });
 
