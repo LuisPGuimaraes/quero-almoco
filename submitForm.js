@@ -3,16 +3,40 @@ require('dotenv').config();
 
 // Função principal primeiro
 async function submitForm(data) {
-  const browser = await chromium.launch({ headless: true, slowMo: 200 });
+  const browser = await chromium.launch({ headless: false, slowMo: 200 });
   const context = await browser.newContext({ storageState: 'meu_login.json' });
   const page = await context.newPage();
   const automator = new GoogleFormAutomator(page);
+
+  async function isGFormCheckboxChecked(selector = 'div[role="checkbox"]') {
+    const el = page.locator(selector).first();
+    if ((await el.count()) === 0) return false;
+
+    const aria = await el.getAttribute('aria-checked').catch(() => null);
+    if (aria === 'true') return true;
+
+    const cls = (await el.getAttribute('class').catch(() => '')) || '';
+    if (/(Y6Myld|uHMk6b|MocG8c|isChecked)/.test(cls)) return true;
+
+    const parent = el.locator('..');
+    const pcls = (await parent.getAttribute('class').catch(() => '')) || '';
+    return /(Y6Myld|uHMk6b|MocG8c|isChecked)/.test(pcls);
+  }
 
   try {
     await page.goto(process.env.URL_TESTE, { waitUntil: 'networkidle' });
 
     console.log('[INFO] Preenchendo checkbox principal...');
-    await page.locator('div[role="checkbox"]').click();
+    await page.locator('div[role="checkbox"]').first().click();
+    await page.waitForTimeout(100);
+
+    // Se não marcou, tenta novamente uma vez
+    let checkbox = await isGFormCheckboxChecked();
+    if (!checkbox) {
+      await page.locator('div[role="checkbox"]').first().click();
+      await page.waitForTimeout(100);
+      checkbox = await isGFormCheckboxChecked();
+    }
 
     console.log('[INFO] Selecionando opções...');
     await automator.clickElement('1 pessoa');
@@ -20,8 +44,10 @@ async function submitForm(data) {
 
     console.log('[INFO] Preenchendo campo de texto...');
     await page.locator('input[jsname="YPqjbf"]').fill(data);
+    // aciona validação para habilitar o botão
+    await page.keyboard.press('Tab');
+    await page.waitForTimeout(150);
 
-    const checkbox = await page.locator('div[role="checkbox"]').isChecked().catch(() => false);
     const textValue = await page.locator('input[jsname="YPqjbf"]').inputValue().catch(() => '');
 
     console.log(`[INFO] Verificação: Checkbox ${checkbox ? 'find' : 'not find'}, Texto ${textValue === data ? 'find' : 'not find'}`);
@@ -45,13 +71,12 @@ async function submitForm(data) {
     throw err;
   } finally {
     try {
-      // Monta nome apenas com data e hora: dd-mm-aaaa-HH-MM
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const fileName = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}-${pad(now.getHours())}-${pad(now.getMinutes())}`;
       const screenshotPath = `/home/luis/quero-almoco/screenshots/${fileName}`;
       
-      await page.screenshot({ path: screenshotPath, fullPage: true });
+      await page.screenshot({ path: screenshotPath, fullPage: true, type: 'png' });
       console.log(`Screenshot salva em: ${screenshotPath}`);
     } catch (screenshotErr) {
       console.log(`Falha ao salvar screenshot: ${screenshotErr.message}`);
@@ -125,19 +150,47 @@ class GoogleFormAutomator {
   }
 
   async clickSubmitButton() {
-    const strategies = [
-      () => this.page.getByRole('button', { name: 'Enviar' }).click(),
-      () => this.page.locator('span:has-text("Enviar")').click(),
-      () => this.page.locator('button:has-text("Enviar")').click(),
-      () => this.page.locator('div[role="button"]:has-text("Enviar")').click()
+    const candidates = [
+      this.page.getByRole('button', { name: /enviar/i }),
+      this.page.locator('[role="button"]:has-text("Enviar")'),
+      this.page.locator('.uArJ5e.UQuaGc.Y5sE8d.VkkpIf.NqnGTe'),
+      this.page.locator('button:has-text("Enviar")'),
+      this.page.locator('div[role="button"][aria-label="Enviar"]'),
+      this.page.locator('span:has-text("Enviar")').locator('xpath=ancestor-or-self::div[@role="button"]')
     ];
 
-    for (let i = 0; i < strategies.length; i++) {
-      if (await this.tryAction(strategies[i], `Tentativa ${i + 1} de clicar no botão enviar`)) {
+    for (let i = 0; i < candidates.length; i++) {
+      const loc = candidates[i].first();
+      const count = await loc.count();
+      if (count === 0) continue;
+      try { await loc.scrollIntoViewIfNeeded(); } catch {}
+      try { await loc.waitFor({ state: 'visible', timeout: 2000 }); } catch {}
+
+      // Evita tentar clicar se estiver desabilitado
+      const ariaDisabled = await loc.getAttribute('aria-disabled').catch(() => null);
+      if (ariaDisabled === 'true') {
+        // tenta a próxima estratégia
+        continue;
+      }
+
+      if (await this.tryAction(() => loc.click({ trial: true }), `Teste de clique (estratégia ${i + 1})`)) {
+        if (await this.tryAction(() => loc.click(), `Clicar enviar (estratégia ${i + 1})`)) {
+          return true;
+        }
+      }
+
+      if (await this.tryAction(() => loc.click({ force: true }), `Clicar enviar com force (estratégia ${i + 1})`)) {
         return true;
       }
-      await this.page.waitForTimeout(200);
     }
+
+    // Fallback: Enter
+    await this.page.keyboard.press('Enter').catch(() => {});
+    try {
+      await this.page.waitForSelector('text=Sua resposta foi registrada.', { timeout: 2000 });
+      return true;
+    } catch {}
+
     return false;
   }
 }
