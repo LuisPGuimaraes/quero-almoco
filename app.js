@@ -81,7 +81,11 @@ app.post('/enviar', async (req, res) => {
 
 app.get('/enviar', (req, res) => res.redirect('/'));
 
-app.get('*', (req, res) => res.redirect('/'));
+// Fallback: qualquer GET não mapeado redireciona para a página principal (sem usar path-to-regexp)
+app.use((req, res, next) => {
+  if (req.method === 'GET') return res.redirect('/');
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
