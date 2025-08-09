@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <title>Convidado para o Almoço</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #b34cee;
@@ -18,85 +15,52 @@
       min-height: 100vh;
       margin: 0;
     }
+    .container { display: grid; gap: 20px; max-width: 900px; width: 100%; grid-template-columns: 1fr; }
+    /* Mantém uma única coluna em todas as larguras para deixar o calendário abaixo do formulário */
+    /* @media (min-width: 900px) { .container { grid-template-columns: 1fr 1fr; } } */
 
-    form {
+    form, .panel {
       background: #fff;
       padding: 30px 40px;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-      max-width: 400px;
       width: 100%;
     }
 
-    .back_calendar {
-      background: #fff;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-      max-width: 400px;
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    h1 {
-      margin-top: 0;
-      margin-bottom: 24px;
-      font-weight: 700;
-      color: #2c3e50;
-      text-align: center;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #34495e;
-    }
+    h1 { margin: 0 0 24px; font-weight: 700; color: #2c3e50; text-align: center; }
+    label { display: block; font-weight: 600; margin-bottom: 8px; color: #34495e; }
 
     input[type="date"] {
-      width: 100%;
-      padding: 10px 14px;
-      border: 2px solid #ddd;
-      border-radius: 6px;
-      font-size: 16px;
-      transition: border-color 0.3s ease;
+      width: 100%; padding: 10px 14px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; transition: border-color 0.3s ease;
     }
-    input[type="date"]:focus {
-      outline: none;
-      border-color: #2ecc71;
-      box-shadow: 0 0 5px rgba(46, 204, 113, 0.6);
-    }
+    input[type="date"]:focus { outline: none; border-color: #2ecc71; box-shadow: 0 0 5px rgba(46, 204, 113, 0.6); }
 
     button {
-      margin-top: 30px;
-      width: 100%;
-      padding: 14px;
-      font-size: 18px;
-      background-color: #27ae60;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-      transition: background-color 0.3s ease;
+      margin-top: 30px; width: 100%; padding: 14px; font-size: 18px; background-color: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; transition: background-color 0.3s ease;
     }
-    button:hover {
-      background-color: #2ecc71;
-    }
+    button:hover { background-color: #2ecc71; }
 
-    /* Responsivo */
-    @media (max-width: 480px) {
-      form {
-        padding: 20px;
-      }
-      h1 {
-        font-size: 1.6rem;
-      }
-    }
+    /* Calendário */
+    .calendar { display: grid; gap: 12px; }
+    .calendar header { display: flex; align-items: center; justify-content: space-between; }
+    .month-nav button { background: #eee; color: #333; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; }
+    .month-nav span { font-weight: 700; color: #2c3e50; }
+
+    .weekdays, .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .weekdays div { text-align: center; font-weight: 700; color: #7f8c8d; }
+
+    .day { height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; background: #fafafa; color: #2c3e50; }
+    .day.other { opacity: 0.35; }
+    .day.today { border: 2px solid #8e44ad; }
+    .day.marked { background: #27ae60; color: #fff; font-weight: 700; border-color: #27ae60; }
+    .legend { display: flex; gap: 12px; align-items: center; font-size: 14px; color: #2c3e50; }
+    .legend .chip { width: 14px; height: 14px; border-radius: 4px; display: inline-block; margin-right: 6px; }
+    .chip.marked { background: #27ae60; }
+    .chip.today { border: 2px solid #8e44ad; }
   </style>
 </head>
 <body>
-  <div>
+  <div class="container">
     <form action="/enviar" method="POST">
       <h1>Eaii Duda</h1>
       <h3>Não esqueceu dessa vez né</h3>
@@ -106,9 +70,104 @@
       <button type="submit">Enviar pedido</button>
     </form>
 
-    <div id="datas-preenchidas" class="back_calendar">
-      {{DATAS}}
+    <div class="panel">
+      <div class="calendar">
+        <header>
+          <div class="month-nav">
+            <button id="prev">◀</button>
+          </div>
+          <span id="monthLabel"></span>
+          <div class="month-nav">
+            <button id="next">▶</button>
+          </div>
+        </header>
+        <div class="weekdays">
+          <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+        </div>
+        <div id="days" class="days"></div>
+        <div class="legend">
+          <span class="chip marked"></span> Dia registrado
+          <span class="chip today" style="margin-left:16px"></span> Hoje
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Datas registradas em JSON injetadas pelo servidor -->
+  <script id="dates-data" type="application/json">{{REGISTERED_DATES_JSON}}</script>
+
+  <script>
+    // Lê as datas registradas do script JSON
+    let REGISTERED_DATES = [];
+    try {
+      const raw = document.getElementById('dates-data').textContent || '[]';
+      REGISTERED_DATES = JSON.parse(raw);
+    } catch (e) { REGISTERED_DATES = []; }
+
+    function toKey(d) { return d.toISOString().slice(0,10); }
+    const marked = new Set(REGISTERED_DATES);
+
+    const daysEl = document.getElementById('days');
+    const monthLabel = document.getElementById('monthLabel');
+
+    let viewDate = new Date();
+    viewDate.setDate(1);
+
+    function render() {
+      daysEl.innerHTML = '';
+      const year = viewDate.getFullYear();
+      const month = viewDate.getMonth();
+
+      const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      monthLabel.textContent = `${monthNames[month]} de ${year}`;
+
+      const firstDay = new Date(year, month, 1);
+      const startWeekday = firstDay.getDay(); // 0..6
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+      // Dias do mês anterior para preencher a grade
+      for (let i = startWeekday - 1; i >= 0; i--) {
+        const dayNum = daysInPrevMonth - i;
+        const d = new Date(year, month - 1, dayNum);
+        addDay(d, true);
+      }
+      // Dias do mês atual
+      for (let d = 1; d <= daysInMonth; d++) {
+        addDay(new Date(year, month, d), false);
+      }
+      // Completa a grade até múltiplos de 7
+      while (daysEl.children.length % 7 !== 0) {
+        const nextIndex = daysEl.children.length - (startWeekday + daysInMonth) + 1;
+        const d = new Date(year, month + 1, nextIndex);
+        addDay(d, true);
+      }
+    }
+
+    function addDay(dateObj, isOtherMonth) {
+      const el = document.createElement('div');
+      el.className = 'day' + (isOtherMonth ? ' other' : '');
+      el.textContent = dateObj.getDate();
+
+      const todayKey = toKey(new Date());
+      const key = toKey(dateObj);
+      if (key === todayKey) el.classList.add('today');
+      if (marked.has(key)) el.classList.add('marked');
+
+      daysEl.appendChild(el);
+    }
+
+    document.getElementById('prev').addEventListener('click', () => {
+      viewDate.setMonth(viewDate.getMonth() - 1);
+      render();
+    });
+    document.getElementById('next').addEventListener('click', () => {
+      viewDate.setMonth(viewDate.getMonth() + 1);
+      render();
+    });
+
+    render();
+  </script>
 </body>
 </html>

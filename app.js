@@ -29,11 +29,8 @@ app.get('/', (req, res) => {
     }
   }
 
-  const listaHtml = dates.length > 0
-    ? `<h3>📅 Datas já preenchidas:</h3><ul>${dates.map(d => `<li>${d}</li>`).join('')}</ul>`
-    : '';
-
-  html = html.replace(/{{DATAS}}/g, listaHtml);
+  // Injeta as datas como JSON para o script do calendário
+  html = html.replace('{{REGISTERED_DATES_JSON}}', JSON.stringify(dates));
 
   res.setHeader('Cache-Control', 'no-store');
   res.send(html);
@@ -81,6 +78,10 @@ app.post('/enviar', async (req, res) => {
     res.sendFile(path.join(__dirname, 'public/error.html'));
   }
 });
+
+app.get('/enviar', (req, res) => res.redirect('/'));
+
+app.get('*', (req, res) => res.redirect('/'));
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
