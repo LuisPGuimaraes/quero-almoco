@@ -15,10 +15,7 @@
       min-height: 100vh;
       margin: 0;
     }
-    .container { display: grid; gap: 20px; max-width: 900px; width: 100%; grid-template-columns: 1fr; }
-    /* Mantém uma única coluna em todas as larguras para deixar o calendário abaixo do formulário */
-    /* @media (min-width: 900px) { .container { grid-template-columns: 1fr 1fr; } } */
-
+    .container { display: grid; gap: 20px; max-width: 700px; width: 100%; grid-template-columns: 1fr; }
     form, .panel {
       background: #fff;
       padding: 30px 40px;
@@ -40,7 +37,6 @@
     }
     button:hover { background-color: #2ecc71; }
 
-    /* Calendário */
     .calendar { display: grid; gap: 12px; }
     .calendar header { display: flex; align-items: center; justify-content: space-between; }
     .month-nav button { background: #eee; color: #333; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; }
@@ -127,17 +123,14 @@
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-      // Dias do mês anterior para preencher a grade
       for (let i = startWeekday - 1; i >= 0; i--) {
         const dayNum = daysInPrevMonth - i;
         const d = new Date(year, month - 1, dayNum);
         addDay(d, true);
       }
-      // Dias do mês atual
       for (let d = 1; d <= daysInMonth; d++) {
         addDay(new Date(year, month, d), false);
       }
-      // Completa a grade até múltiplos de 7
       while (daysEl.children.length % 7 !== 0) {
         const nextIndex = daysEl.children.length - (startWeekday + daysInMonth) + 1;
         const d = new Date(year, month + 1, nextIndex);
