@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Função principal primeiro
 async function submitForm(data) {
-  const browser = await chromium.launch({ headless: false, slowMo: 200 });
+  const browser = await chromium.launch({ headless: true, slowMo: 200 });
   const context = await browser.newContext({ storageState: 'meu_login.json' });
   const page = await context.newPage();
   const automator = new GoogleFormAutomator(page);
@@ -44,7 +44,6 @@ async function submitForm(data) {
 
     console.log('[INFO] Preenchendo campo de texto...');
     await page.locator('input[jsname="YPqjbf"]').fill(data);
-    // aciona validação para habilitar o botão
     await page.keyboard.press('Tab');
     await page.waitForTimeout(150);
 
