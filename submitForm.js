@@ -10,6 +10,8 @@ async function submitForm(data) {
 
   const page = await context.newPage();
 
+  let screenshotPath = null
+
   try {
     await page.goto(process.env.URL_TESTE, { waitUntil: 'networkidle' });
 
@@ -291,12 +293,24 @@ async function submitForm(data) {
   } catch (err) {
     if (err.name === 'TimeoutError') {
       console.log('[❌ ERRO] Tempo esgotado: não apareceu confirmação de envio.');
-      throw new Error('TimeoutError: não apareceu confirmação de envio.');
     } else {
       console.log('[❌ ERRO] Falha ao enviar:', err.message);
-      throw err;
     }
+    throw err;
   } finally {
+    try {
+      // Cria nome do arquivo com timestamp
+      const fileName = `ultima_tela_${Date.now()}.png`;
+      screenshotPath = '/home/luis/quero-almoco/screenshots/' + fileName;
+      console.log(`[INFO] Salvando screenshot em: ${screenshotPath}`);
+
+      // Faz a captura da tela
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      console.log(`[📸] Screenshot da última tela salva em: ${screenshotPath}`);
+    } catch (screenshotErr) {
+      console.log(`[⚠️] Falha ao salvar screenshot: ${screenshotErr.message}`);
+    }
+
     await browser.close();
   }
 }
