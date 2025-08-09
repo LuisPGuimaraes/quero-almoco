@@ -72,7 +72,7 @@ async function submitForm(data) {
     try {
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
-      const fileName = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}-${pad(now.getHours())}-${pad(now.getMinutes())}`;
+      const fileName = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}-${pad(now.getHours())}-${pad(now.getMinutes())}.png`;
       const screenshotPath = `/home/luis/quero-almoco/screenshots/${fileName}`;
       
       await page.screenshot({ path: screenshotPath, fullPage: true, type: 'png' });
@@ -165,10 +165,8 @@ class GoogleFormAutomator {
       try { await loc.scrollIntoViewIfNeeded(); } catch {}
       try { await loc.waitFor({ state: 'visible', timeout: 2000 }); } catch {}
 
-      // Evita tentar clicar se estiver desabilitado
       const ariaDisabled = await loc.getAttribute('aria-disabled').catch(() => null);
       if (ariaDisabled === 'true') {
-        // tenta a próxima estratégia
         continue;
       }
 
@@ -183,7 +181,6 @@ class GoogleFormAutomator {
       }
     }
 
-    // Fallback: Enter
     await this.page.keyboard.press('Enter').catch(() => {});
     try {
       await this.page.waitForSelector('text=Sua resposta foi registrada.', { timeout: 2000 });
