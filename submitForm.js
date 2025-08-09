@@ -45,7 +45,10 @@ async function submitForm(data) {
     throw err;
   } finally {
     try {
-      const fileName = `ultima_tela_${Date.now()}.png`;
+      // Monta nome apenas com data e hora: dd-mm-aaaa-HH-MM
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const fileName = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}-${pad(now.getHours())}-${pad(now.getMinutes())}`;
       const screenshotPath = `/home/luis/quero-almoco/screenshots/${fileName}`;
       
       await page.screenshot({ path: screenshotPath, fullPage: true });
