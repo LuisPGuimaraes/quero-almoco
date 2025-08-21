@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const submitForm = require('../submitForm');
+const submitForm = require('./submitForm');
 require('dotenv').config();
 
 const app = express();
