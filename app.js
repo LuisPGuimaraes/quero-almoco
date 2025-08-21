@@ -1,16 +1,22 @@
 const express = require('express');
-const submitForm = require('./submitForm');
 const path = require('path');
 const fs = require('fs');
-const bodyParser = require('body-parser');
+const submitForm = require('./submitForm');
 require('dotenv').config();
 
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 3000;
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Rota principal - serve HTML com datas injetadas
+app.use('/static', express.static(path.join(__dirname, 'public')));
+
+const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
+if (fs.existsSync(faviconPath)) {
+  app.get('/favicon.ico', (req, res) => res.sendFile(faviconPath));
+}
+
 app.get('/', (req, res) => {
   console.log('[INFO] Rota / acessada');
 
@@ -29,17 +35,11 @@ app.get('/', (req, res) => {
     }
   }
 
-  // Injeta as datas como JSON para o script do calendário
   html = html.replace('{{REGISTERED_DATES_JSON}}', JSON.stringify(dates));
 
   res.setHeader('Cache-Control', 'no-store');
   res.send(html);
 });
-
-// Agora serve arquivos estáticos (CSS, JS, etc.)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// ... restante das rotas (success, error, enviar)
 
 app.get('/success', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/success.html'));
@@ -68,7 +68,6 @@ app.post('/enviar', async (req, res) => {
       }
     }
 
-    // Adiciona a data mesmo que já exista
     dates.push(data);
     fs.writeFileSync(jsonPath, JSON.stringify(dates, null, 2));
 
@@ -87,5 +86,5 @@ app.use((req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
+  console.log(`✅ Servidor rodando na porta ${PORT} (http://localhost:${PORT})`);
 });
