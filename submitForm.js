@@ -31,7 +31,7 @@ async function submitForm(data) {
     await page.locator('div[role="checkbox"]').first().click();
     await page.waitForTimeout(100);
 
-    // Se não marcou, tenta novamente uma vez
+    // Se não marcou, tenta novsamente uma vez
     let checkbox = await isGFormCheckboxChecked();
     if (!checkbox) {
       await page.locator('div[role="checkbox"]').first().click();
