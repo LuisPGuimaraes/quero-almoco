@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node app/index.js",
-    "postinstall": "npx playwright install"
+    "postinstall": "npx playwright install && npx playwright install-deps"
   },
   "dependencies": {
     "express": "^4.18.2",
