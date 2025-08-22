@@ -1,7 +1,6 @@
 const { chromium } = require('playwright');
 require('dotenv').config();
 
-// Função principal primeiro
 async function submitForm(data) {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'],slowMo: 200 });
   const storageState = JSON.parse(process.env.STORAGE_STATE);
