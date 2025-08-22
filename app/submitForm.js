@@ -4,7 +4,7 @@ require('dotenv').config();
 // Função principal primeiro
 async function submitForm(data) {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'],slowMo: 200 });
-  const storageState = process.env.STORAGE_STATE
+  const storageState = JSON.parse(process.env.STORAGE_STATE);
   const context = await browser.newContext({ storageState });
   const page = await context.newPage();
   const automator = new GoogleFormAutomator(page);
